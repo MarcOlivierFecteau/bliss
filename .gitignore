@@ -1,0 +1,7 @@
+.vscode/
+
+# ROS2 Colcon directories
+**/build/
+**/log/
+**/install/
+
