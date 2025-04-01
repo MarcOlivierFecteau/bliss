@@ -4,10 +4,8 @@
 
 void Bliss::init_msgs(void)
 {
-    msgin_ = sensor_msgs::msg::Joy();
-    prev_msgin_ = sensor_msgs::msg::Joy();
-    bliss_ = bliss_t();
-    prev_bliss_ = bliss_t();
+    msgin_ = prev_msgin_ = sensor_msgs::msg::Joy();
+    bliss_ = prev_bliss_ = bliss_t();
 }
 
 void Bliss::joy_callback(const sensor_msgs::msg::Joy::SharedPtr msgin)
@@ -31,6 +29,8 @@ void Bliss::joy_callback(const sensor_msgs::msg::Joy::SharedPtr msgin)
     if (bliss_.buttons.empty()) {
         bliss_.buttons.resize(msgin->buttons.size());
     }
+
+    bliss_.header.stamp = timestamp_;
 
     for (size_t i = 0; i < msgin_.axes.size(); ++i) {
         bliss_.axes = msgin_.axes;
