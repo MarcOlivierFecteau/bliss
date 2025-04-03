@@ -4,7 +4,7 @@ std_msgs/Header header
 float32[] axes
 
 # The D-Pad measurements from a joystick controller (normally axes)
-bliss_msgs/Button[] dpad
+bliss/Button[] dpad
 
 # The buttons measurements from a joystick controller
-bliss_msgs/Button[] buttons
+bliss/Button[] buttons

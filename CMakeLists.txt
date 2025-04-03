@@ -15,15 +15,26 @@ endif()
 
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
+find_package(rosidl_default_generators REQUIRED)
+find_package(std_msgs REQUIRED)
 find_package(sensor_msgs REQUIRED)
-find_package(bliss_msgs REQUIRED)
+
+set(msg_files
+  "msg/Button.msg"
+  "msg/Bliss.msg"
+)
+
+rosidl_generate_interfaces(${PROJECT_NAME}
+  ${msg_files}
+  DEPENDENCIES std_msgs
+)
 
 include_directories(include)
 
-add_executable(bliss src/main.cpp)
-ament_target_dependencies(bliss
+add_executable(bliss_node src/main.cpp)
+ament_target_dependencies(bliss_node
   rclcpp
-  bliss_msgs
+  std_msgs
   sensor_msgs
 )
 
@@ -38,14 +49,22 @@ install(DIRECTORY
 )
 
 install(TARGETS
-  bliss
+  bliss_node
   DESTINATION lib/${PROJECT_NAME}
 )
+
+rosidl_get_typesupport_target(cpp_typesupport_target
+  ${PROJECT_NAME} rosidl_typesupport_cpp
+)
+
+target_link_libraries(bliss_node "${cpp_typesupport_target}")
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
   set(ament_cmake_cpplint_FOUND TRUE)
   ament_lint_auto_find_test_dependencies()
 endif()
+
+ament_export_dependencies(rosidl_default_runtime)
 
 ament_package()

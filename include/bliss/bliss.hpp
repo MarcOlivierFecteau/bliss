@@ -3,13 +3,13 @@
 
 #include <rclcpp/rclcpp.hpp>
 
-#include <bliss_msgs/msg/bliss.hpp>
-#include <bliss_msgs/msg/button.hpp>
+#include "bliss/msg/bliss.hpp"
+#include "bliss/msg/button.hpp"
 #include <sensor_msgs/msg/joy.hpp>
 
 typedef std::string name_t;
 typedef uint32_t delay_t;
-typedef bliss_msgs::msg::Bliss bliss_t;
+typedef bliss::msg::Bliss bliss_t;
 
 class Bliss : public rclcpp::Node
 {

@@ -3,10 +3,9 @@ from launch_ros.actions import Node
 
 bliss_node = Node(
     package="bliss",
-    executable="bliss",
+    executable="bliss_node",
     name="bliss_node",
     output="screen",
-    parameters=[{"use_sim_time": False}],
 )
 
 joy_node = Node(
