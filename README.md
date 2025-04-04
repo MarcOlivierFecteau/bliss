@@ -51,6 +51,8 @@ Interesting features that MIGHT be added ulteriorly:
 - Parameter server (dynamic reconfigure): *N/A*
   - Services for resetting values (e.g. counters, lock values)
 - Auto-detect controller (automatic remappings): *N/A*
+  - Implicitly: hot-swap support
+  - NOTE: though `joy_node` supports automatic remappings, `bliss_node` crashes due to OOB access error.
 - Modifier "keys": *N/A*
 - Layers | Profiles: *N/A*
 - Runtime feature customization: *N/A*
