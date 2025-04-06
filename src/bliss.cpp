@@ -59,6 +59,7 @@ void Bliss::joy_callback(const sensor_msgs::msg::Joy::SharedPtr msgin)
             int32_t raw = msgin_.axes.at(i);
             int32_t prev_raw = prev_msgin_.axes.at(i);
             int32_t count = prev_bliss_.dpad[j].count; // Delta counter
+            uint64_t time_held = prev_bliss_.dpad[j].time_held;
 
             bool rising_edge = (prev_raw == 0 && raw != 0);
             bool falling_edge = (prev_raw != 0 && raw == 0);
@@ -66,12 +67,18 @@ void Bliss::joy_callback(const sensor_msgs::msg::Joy::SharedPtr msgin)
             if (rising_edge) {
                 count += raw;
             }
+            if (prev_bliss_.dpad[j].raw == raw && raw != 0) {
+                time_held += (timestamp_.nanoseconds() - prev_timestamp_.nanoseconds());
+            } else {
+                time_held = 0UL;
+            }
 
             bliss_.dpad[j].raw = raw;
             bliss_.dpad[j].count = count;
             bliss_.dpad[j].rising_edge = rising_edge;
             bliss_.dpad[j].falling_edge = falling_edge;
             bliss_.dpad[j].toggle = toggle;
+            bliss_.dpad[j].time_held = time_held;
         }
     }
 
@@ -79,6 +86,7 @@ void Bliss::joy_callback(const sensor_msgs::msg::Joy::SharedPtr msgin)
         int32_t raw = msgin_.buttons[i];
         int32_t prev_raw = prev_msgin_.buttons[i];
         int32_t count = prev_bliss_.buttons[i].count;
+        uint64_t time_held = prev_bliss_.buttons[i].time_held;
 
         bool rising_edge = (prev_raw == 0 && raw == 1);
         bool falling_edge = (prev_raw == 1 && raw == 0);
@@ -89,12 +97,18 @@ void Bliss::joy_callback(const sensor_msgs::msg::Joy::SharedPtr msgin)
         } else {
             toggle = prev_bliss_.buttons[i].toggle;
         }
+        if (prev_bliss_.buttons[i].raw == raw && raw == 1) {
+            time_held += (timestamp_.nanoseconds() - prev_timestamp_.nanoseconds());
+        } else {
+            time_held = 0UL;
+        }
 
         bliss_.buttons[i].raw = raw;
         bliss_.buttons[i].count = count;
         bliss_.buttons[i].rising_edge = rising_edge;
         bliss_.buttons[i].falling_edge = falling_edge;
         bliss_.buttons[i].toggle = toggle;
+        bliss_.buttons[i].time_held = time_held;
     }
     publisher_->publish(bliss_);
 }
