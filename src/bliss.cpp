@@ -52,33 +52,64 @@ void Bliss::joy_callback(const sensor_msgs::msg::Joy::SharedPtr msgin)
     timestamp_ = msgin_.header.stamp;
     bliss_.header.stamp = timestamp_;
 
+    /* Double click feature v1.0:
+     * Using a single variable for all buttons to reduce messages' size.
+     * TODO (v2.0): track double click cooldown for each button.
+     */
+    static uint64_t last_double_click_stamp = (uint64_t)0; // ns
+
+    uint64_t stamp_ns = timestamp_.nanoseconds(); // For convenience
+
     for (size_t i = 0; i < msgin_.axes.size(); ++i) {
-        bliss_.axes.at(i) = msgin_.axes.at(i);
+        bliss_.axes[i] = msgin_.axes[i];
         if (i == 6 || i == 7) { // D-Pad
             size_t j = i - 6;
-            int32_t raw = msgin_.axes.at(i);
-            int32_t prev_raw = prev_msgin_.axes.at(i);
+
+            int32_t raw = msgin_.axes[i];
+            int32_t prev_raw = prev_msgin_.axes[i];
             int32_t count = prev_bliss_.dpad[j].count; // Delta counter
             uint64_t time_held = prev_bliss_.dpad[j].time_held;
+            uint64_t last_click_timestamp = prev_bliss_.dpad[j].last_click_stamp;
+            bool double_click = prev_bliss_.dpad[j].double_click;
 
+            delay_t last_click_dt = stamp_ns - last_click_timestamp; // ns
             bool rising_edge = (prev_raw == 0 && raw != 0);
             bool falling_edge = (prev_raw != 0 && raw == 0);
             static const bool toggle = false; // Toggle not supported
+
             if (rising_edge) {
+                double_click = last_click_dt < double_click_threshold_;
+
+                // Double click cooldown
+                if (double_click) {
+                    if (stamp_ns - last_double_click_stamp > double_click_cooldown_) {
+                        last_double_click_stamp = stamp_ns;
+                    } else {
+                        double_click = false;
+                    }
+                }
                 count += raw;
+                last_click_timestamp = stamp_ns;
             }
+            if (falling_edge) {
+                double_click = false;
+            }
+
+            // Time held
             if (prev_bliss_.dpad[j].raw == raw && raw != 0) {
-                time_held += (timestamp_.nanoseconds() - prev_timestamp_.nanoseconds());
+                time_held += (stamp_ns - prev_timestamp_.nanoseconds());
             } else {
                 time_held = 0UL;
             }
 
+            bliss_.dpad[j].last_click_stamp = last_click_timestamp;
+            bliss_.dpad[j].time_held = time_held;
             bliss_.dpad[j].raw = raw;
             bliss_.dpad[j].count = count;
             bliss_.dpad[j].rising_edge = rising_edge;
             bliss_.dpad[j].falling_edge = falling_edge;
             bliss_.dpad[j].toggle = toggle;
-            bliss_.dpad[j].time_held = time_held;
+            bliss_.dpad[j].double_click = double_click;
         }
     }
 
@@ -87,29 +118,51 @@ void Bliss::joy_callback(const sensor_msgs::msg::Joy::SharedPtr msgin)
         int32_t prev_raw = prev_msgin_.buttons[i];
         int32_t count = prev_bliss_.buttons[i].count;
         uint64_t time_held = prev_bliss_.buttons[i].time_held;
+        uint64_t last_click_timestamp = prev_bliss_.buttons[i].last_click_stamp;
+        bool toggle = prev_bliss_.buttons[i].toggle;
+        bool double_click = prev_bliss_.buttons[i].double_click;
 
+        uint64_t last_click_dt = stamp_ns - last_click_timestamp;
         bool rising_edge = (prev_raw == 0 && raw == 1);
         bool falling_edge = (prev_raw == 1 && raw == 0);
-        bool toggle;
+
         if (rising_edge) {
+            double_click = last_click_dt < double_click_threshold_;
+
+            // Double click cooldown
+            if (double_click) {
+                if (stamp_ns - last_double_click_stamp > double_click_cooldown_) {
+                    last_double_click_stamp = stamp_ns;
+                } else {
+                    double_click = false;
+                }
+            }
+
             ++count;
-            toggle = !prev_bliss_.buttons[i].toggle;
-        } else {
-            toggle = prev_bliss_.buttons[i].toggle;
+            toggle = !toggle;
+            last_click_timestamp = stamp_ns;
         }
+        if (falling_edge) {
+            double_click = false;
+        }
+
+        // Property: time held
         if (prev_bliss_.buttons[i].raw == raw && raw == 1) {
-            time_held += (timestamp_.nanoseconds() - prev_timestamp_.nanoseconds());
+            time_held += (stamp_ns - prev_timestamp_.nanoseconds());
         } else {
             time_held = 0UL;
         }
 
+        bliss_.buttons[i].last_click_stamp = last_click_timestamp;
+        bliss_.buttons[i].time_held = time_held;
         bliss_.buttons[i].raw = raw;
         bliss_.buttons[i].count = count;
         bliss_.buttons[i].rising_edge = rising_edge;
         bliss_.buttons[i].falling_edge = falling_edge;
         bliss_.buttons[i].toggle = toggle;
-        bliss_.buttons[i].time_held = time_held;
+        bliss_.buttons[i].double_click = double_click;
     }
+
     publisher_->publish(bliss_);
 }
 

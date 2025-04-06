@@ -8,7 +8,7 @@
 #include <sensor_msgs/msg/joy.hpp>
 
 typedef std::string name_t;
-typedef uint32_t delay_t;
+typedef uint64_t delay_t;
 typedef bliss::msg::Bliss bliss_t;
 
 class Bliss : public rclcpp::Node
@@ -20,6 +20,8 @@ class Bliss : public rclcpp::Node
   private:
     sensor_msgs::msg::Joy msgin_, prev_msgin_;
     bliss_t bliss_, prev_bliss_;
+    delay_t double_click_threshold_ = (delay_t)(500 * 1000000); // ns
+    delay_t double_click_cooldown_ = (delay_t)(500 * 1000000);  // ns
 
     rclcpp::Clock clock_;
     rclcpp::Time timestamp_, prev_timestamp_;

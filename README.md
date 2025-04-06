@@ -38,7 +38,7 @@ As of: 2025-04-05
 | Toggle | ✔ | - | - |
 | Counter | ✔ | ✔\* | - |
 | Time held | ✔ | ✔ | - |
-| Double click | - | - | - |
+| Double click | ✔ | ✔ | - |
 | Lock value | - | - | - |
 
 > \* Supports "delta-counter" (e.g. +1 for 'up', -1 for 'down').
