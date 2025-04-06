@@ -28,7 +28,7 @@ ros2 launch bliss bliss.launch.py   # Includes `joy_node`
 
 ## Feature support
 
-As of: 2025-04-03
+As of: 2025-04-05
 
 | **Feature** | **Buttons** | **D-Pad** | **Analog** |
 |---|---|---|---|
@@ -37,7 +37,7 @@ As of: 2025-04-03
 | Falling edge | ✔ | ✔ | - |
 | Toggle | ✔ | - | - |
 | Counter | ✔ | ✔\* | - |
-| Time held | - | - | - |
+| Time held | ✔ | ✔ | - |
 | Double click | - | - | - |
 | Lock value | - | - | - |
 
@@ -56,3 +56,18 @@ Interesting features that MIGHT be added ulteriorly:
 - Modifier "keys": *N/A*
 - Layers | Profiles: *N/A*
 - Runtime feature customization: *N/A*
+
+## Known issues
+
+### D-Pad "ghost" input
+
+This issue can be reproduced by following these steps:
+
+1. Be buttons `n` from axis `N`, and `m` from axis `M != N`;
+1. Hold `n`;
+1. Hold `m`;
+1. Release `n`;
+
+**Result**: `n`'s `raw`, and implicitly it's `time_held`, are NOT reset until either `m` is released, or the button opposite to `n` is pressed.
+
+**Hypothesis**: the cause fo this "ghost input" stems from the hardware itself, and therefore WILL NOT and CANNOT be fixed.
