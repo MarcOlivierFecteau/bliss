@@ -33,12 +33,12 @@ As of: 2025-04-05
 | **Feature** | **Buttons** | **D-Pad** | **Analog** |
 |---|---|---|---|
 | Raw value | ✔ | ✔ | ✔ |
-| Rising edge | ✔ | ✔ | - |
-| Falling edge | ✔ | ✔ | - |
-| Toggle | ✔ | - | - |
-| Counter | ✔ | ✔\* | - |
+| Rising edge | ✔ | ✔ | ✔ |
+| Falling edge | ✔ | ✔ | ✔ |
+| Toggle | ✔ | - | *N/A* |
+| Counter | ✔ | ✔\* | *N/A* |
 | Time held | ✔ | ✔ | - |
-| Double click | ✔ | ✔ | - |
+| Double click | ✔ | ✔ | *N/A* |
 | Lock value | - | - | - |
 
 > \* Supports "delta-counter" (i.e. +1 for 'up', -1 for 'down').

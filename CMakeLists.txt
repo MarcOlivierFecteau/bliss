@@ -21,6 +21,7 @@ find_package(sensor_msgs REQUIRED)
 
 set(msg_files
   "msg/Button.msg"
+  "msg/Analog.msg"
   "msg/Bliss.msg"
 )
 
