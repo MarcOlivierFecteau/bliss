@@ -1,6 +1,6 @@
 # Bliss (*noun*): heavenly joy
 
-This ROS package takes inputs from `joy_node`, and adds features such as rising/falling edge detecion, ans toggle support. The motivation for this package is to bring more advanced controls to joystick controller in ROS.
+This ROS package takes inputs from `joy_node`, and adds features such as rising/falling edge detecion, and toggle support. The motivation for this package is to bring more advanced controls to joystick controller in ROS.
 
 > *N.B.* The documentation for this package uses 'ROS' to refer to 'ROS 2'.
 
@@ -41,7 +41,7 @@ As of: 2025-04-05
 | Double click | ✔ | ✔ | - |
 | Lock value | - | - | - |
 
-> \* Supports "delta-counter" (e.g. +1 for 'up', -1 for 'down').
+> \* Supports "delta-counter" (i.e. +1 for 'up', -1 for 'down').
 
 ### Other features
 
@@ -68,6 +68,6 @@ This issue can be reproduced by following these steps:
 1. Hold `m`;
 1. Release `n`;
 
-**Result**: `n`'s `raw`, and implicitly it's `time_held`, are NOT reset until either `m` is released, or the button opposite to `n` is pressed.
+**Result**: `n`'s `raw`, and implicitly its `time_held`, are NOT reset until either `m` is released, or the button opposite to `n` is pressed.
 
-**Hypothesis**: the cause fo this "ghost input" stems from the hardware itself, and therefore WILL NOT and CANNOT be fixed.
+**Hypothesis**: the cause of this "ghost input" stems from the hardware itself, and therefore WILL NOT and CANNOT be fixed.
