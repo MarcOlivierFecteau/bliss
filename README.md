@@ -9,13 +9,13 @@ This ROS package takes inputs from `joy_node`, and adds features such as rising/
 Clone this repository into your ROS workspace's `src` directory:
 
 ```bash
-git clone git@ssh.dev.azure.com:v3/CTA-BRP-UdeS/SCoPe2.0/bliss path/to/ros2_ws/src/
+git clone git@github.com:MarcOlivierFecteau/bliss.git path/to/ros2_ws/src/
 ```
 
 Build the package (from the ROS workspace's root directory):
 
 ```bash
-colcon build [--packages-select bliss]
+colcon build [--packages-select bliss bliss_msgs]
 source install/local_setup.bash
 ```
 
@@ -26,7 +26,7 @@ ros2 run bliss bliss_node           # `bliss_node` only
 ros2 launch bliss bliss.launch.py   # Includes `joy_node`
 ```
 
-> _N.B._ `game_controller_node` can be used instead with `--node:=game_controller`.
+> _N.B._ `game_controller_node` can be used instead with `--joy_node:=game_controller`.
 
 ## Feature support
 
