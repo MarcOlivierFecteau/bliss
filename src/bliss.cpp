@@ -50,13 +50,9 @@ void Bliss::joy_callback(const sensor_msgs::msg::Joy::SharedPtr msgin)
     timestamp_ = msgin_.header.stamp;
     bliss_.header.stamp = timestamp_;
 
-    /* Double click feature v1.0:
-     * Using a single variable for all buttons to reduce messages' size.
-     * TODO (v2.0): track double click cooldown for each button.
-     */
-    static uint64_t last_double_click_stamp = (uint64_t)0; // ns
-
-    uint64_t stamp_ns = timestamp_.nanoseconds(); // For convenience
+    uint64_t stamp_ns = timestamp_.nanoseconds();           // For convenience
+    uint64_t prev_stamp_ns = prev_timestamp_.nanoseconds(); // For convenience
+    delay_t dt = stamp_ns - prev_stamp_ns;
 
     for (size_t i = 0; i < msgin_.axes.size(); ++i) {
         float raw = msgin_.axes[i];
@@ -72,26 +68,28 @@ void Bliss::joy_callback(const sensor_msgs::msg::Joy::SharedPtr msgin)
             int32_t count = prev_bliss_.dpad[j].count; // Delta counter
             uint64_t time_held = prev_bliss_.dpad[j].time_held;
             uint64_t last_click_timestamp = prev_bliss_.dpad[j].last_click_stamp;
+            int64_t cooldown = prev_bliss_.dpad[j].cooldown;
             bool double_click = prev_bliss_.dpad[j].double_click;
 
             delay_t last_click_dt = stamp_ns - last_click_timestamp; // ns
             static const bool toggle = false;                        // Toggle not supported
 
             if (on_press) {
-                double_click = last_click_dt < double_click_threshold_;
-
-                // Double click cooldown
-                if (double_click) {
-                    if (stamp_ns - last_double_click_stamp > double_click_cooldown_) {
-                        last_double_click_stamp = stamp_ns;
-                    } else {
-                        double_click = false;
-                    }
+                if (cooldown == 0) {
+                    double_click = last_click_dt < double_click_threshold_;
                 }
+
                 count += i_raw;
                 last_click_timestamp = stamp_ns;
             }
+            cooldown -= dt;
+            if (cooldown <= 0) {
+                cooldown = 0;
+            }
             if (on_release) {
+                if (double_click) {
+                    cooldown = double_click_cooldown_;
+                }
                 double_click = false;
             }
 
@@ -104,6 +102,7 @@ void Bliss::joy_callback(const sensor_msgs::msg::Joy::SharedPtr msgin)
 
             bliss_.dpad[j].last_click_stamp = last_click_timestamp;
             bliss_.dpad[j].time_held = time_held;
+            bliss_.dpad[j].cooldown = cooldown;
             bliss_.dpad[j].raw = i_raw;
             bliss_.dpad[j].count = count;
             bliss_.dpad[j].on_press = on_press;
@@ -123,6 +122,7 @@ void Bliss::joy_callback(const sensor_msgs::msg::Joy::SharedPtr msgin)
         int32_t count = prev_bliss_.buttons[i].count;
         uint64_t time_held = prev_bliss_.buttons[i].time_held;
         uint64_t last_click_timestamp = prev_bliss_.buttons[i].last_click_stamp;
+        uint64_t cooldown = prev_bliss_.buttons[i].cooldown;
         bool toggle = prev_bliss_.buttons[i].toggle;
         bool double_click = prev_bliss_.buttons[i].double_click;
 
@@ -131,14 +131,12 @@ void Bliss::joy_callback(const sensor_msgs::msg::Joy::SharedPtr msgin)
         bool on_release = (prev_raw == 1 && raw == 0);
 
         if (on_press) {
-            double_click = last_click_dt < double_click_threshold_;
-
-            // Double click cooldown
-            if (double_click) {
-                if (stamp_ns - last_double_click_stamp > double_click_cooldown_) {
-                    last_double_click_stamp = stamp_ns;
-                } else {
-                    double_click = false;
+            if (cooldown == 0) {
+                double_click = last_click_dt < double_click_threshold_;
+            } else {
+                cooldown -= dt;
+                if (cooldown <= 0) {
+                    cooldown = 0;
                 }
             }
 
@@ -147,6 +145,9 @@ void Bliss::joy_callback(const sensor_msgs::msg::Joy::SharedPtr msgin)
             last_click_timestamp = stamp_ns;
         }
         if (on_release) {
+            if (double_click) {
+                cooldown = double_click_cooldown_;
+            }
             double_click = false;
         }
 
@@ -159,6 +160,7 @@ void Bliss::joy_callback(const sensor_msgs::msg::Joy::SharedPtr msgin)
 
         bliss_.buttons[i].last_click_stamp = last_click_timestamp;
         bliss_.buttons[i].time_held = time_held;
+        bliss_.buttons[i].cooldown = cooldown;
         bliss_.buttons[i].raw = raw;
         bliss_.buttons[i].count = count;
         bliss_.buttons[i].on_press = on_press;
