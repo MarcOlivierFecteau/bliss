@@ -1,5 +1,3 @@
-#include <iostream>
-
 #include "bliss/bliss.hpp"
 
 void Bliss::joy_callback(const sensor_msgs::msg::Joy::SharedPtr msgin)
