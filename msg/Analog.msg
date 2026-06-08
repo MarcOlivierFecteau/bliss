@@ -1,3 +1,3 @@
 float32 raw
-bool rising_edge
-bool falling_edge
+bool on_press
+bool on_release

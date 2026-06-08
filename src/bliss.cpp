@@ -62,8 +62,8 @@ void Bliss::joy_callback(const sensor_msgs::msg::Joy::SharedPtr msgin)
         float raw = msgin_.axes[i];
         float prev_raw = prev_msgin_.axes[i];
 
-        bool rising_edge = (prev_raw == 0.0F && raw != 0.0F);
-        bool falling_edge = (prev_raw != 0.0F && raw == 0.0F);
+        bool on_press = (prev_raw == 0.0F && raw != 0.0F);
+        bool on_release = (prev_raw != 0.0F && raw == 0.0F);
 
         if (i == 6 || i == 7) { // D-Pad
             size_t j = i - 6;
@@ -77,7 +77,7 @@ void Bliss::joy_callback(const sensor_msgs::msg::Joy::SharedPtr msgin)
             delay_t last_click_dt = stamp_ns - last_click_timestamp; // ns
             static const bool toggle = false;                        // Toggle not supported
 
-            if (rising_edge) {
+            if (on_press) {
                 double_click = last_click_dt < double_click_threshold_;
 
                 // Double click cooldown
@@ -91,7 +91,7 @@ void Bliss::joy_callback(const sensor_msgs::msg::Joy::SharedPtr msgin)
                 count += i_raw;
                 last_click_timestamp = stamp_ns;
             }
-            if (falling_edge) {
+            if (on_release) {
                 double_click = false;
             }
 
@@ -106,15 +106,15 @@ void Bliss::joy_callback(const sensor_msgs::msg::Joy::SharedPtr msgin)
             bliss_.dpad[j].time_held = time_held;
             bliss_.dpad[j].raw = i_raw;
             bliss_.dpad[j].count = count;
-            bliss_.dpad[j].rising_edge = rising_edge;
-            bliss_.dpad[j].falling_edge = falling_edge;
+            bliss_.dpad[j].on_press = on_press;
+            bliss_.dpad[j].on_release = on_release;
             bliss_.dpad[j].toggle = toggle;
             bliss_.dpad[j].double_click = double_click;
         }
 
         bliss_.axes[i].raw = raw;
-        bliss_.axes[i].rising_edge = rising_edge;
-        bliss_.axes[i].falling_edge = falling_edge;
+        bliss_.axes[i].on_press = on_press;
+        bliss_.axes[i].on_release = on_release;
     }
 
     for (size_t i = 0; i < msgin_.buttons.size(); ++i) {
@@ -127,10 +127,10 @@ void Bliss::joy_callback(const sensor_msgs::msg::Joy::SharedPtr msgin)
         bool double_click = prev_bliss_.buttons[i].double_click;
 
         uint64_t last_click_dt = stamp_ns - last_click_timestamp;
-        bool rising_edge = (prev_raw == 0 && raw == 1);
-        bool falling_edge = (prev_raw == 1 && raw == 0);
+        bool on_press = (prev_raw == 0 && raw == 1);
+        bool on_release = (prev_raw == 1 && raw == 0);
 
-        if (rising_edge) {
+        if (on_press) {
             double_click = last_click_dt < double_click_threshold_;
 
             // Double click cooldown
@@ -146,7 +146,7 @@ void Bliss::joy_callback(const sensor_msgs::msg::Joy::SharedPtr msgin)
             toggle = !toggle;
             last_click_timestamp = stamp_ns;
         }
-        if (falling_edge) {
+        if (on_release) {
             double_click = false;
         }
 
@@ -161,8 +161,8 @@ void Bliss::joy_callback(const sensor_msgs::msg::Joy::SharedPtr msgin)
         bliss_.buttons[i].time_held = time_held;
         bliss_.buttons[i].raw = raw;
         bliss_.buttons[i].count = count;
-        bliss_.buttons[i].rising_edge = rising_edge;
-        bliss_.buttons[i].falling_edge = falling_edge;
+        bliss_.buttons[i].on_press = on_press;
+        bliss_.buttons[i].on_release = on_release;
         bliss_.buttons[i].toggle = toggle;
         bliss_.buttons[i].double_click = double_click;
     }
