@@ -17,7 +17,7 @@ def generate_launch_description():
 
     joy_node = Node(
         package="joy",
-        executable="joy_node",
+        executable=[joy_node_name, "_node"],
         name=[joy_node_name, "_node"],
         output="screen",
         parameters=[{"deadzone": 0.05}],

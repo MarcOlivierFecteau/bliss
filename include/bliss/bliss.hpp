@@ -1,11 +1,11 @@
 #ifndef BLISS_HPP
 #define BLISS_HPP
 
-#include <rclcpp/rclcpp.hpp>
+#include "rclcpp/rclcpp.hpp"
 
 #include "bliss/msg/bliss.hpp"
 #include "bliss/msg/button.hpp"
-#include <sensor_msgs/msg/joy.hpp>
+#include "sensor_msgs/msg/joy.hpp"
 
 typedef std::string name_t;
 typedef uint64_t delay_t;
@@ -28,7 +28,6 @@ class Bliss : public rclcpp::Node
     rclcpp::Publisher<bliss_t>::SharedPtr publisher_;
     rclcpp::Subscription<sensor_msgs::msg::Joy>::SharedPtr subscription_;
 
-    void init_msgs(void);
     void joy_callback(const sensor_msgs::msg::Joy::SharedPtr msgin);
 };
 
