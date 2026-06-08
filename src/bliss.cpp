@@ -2,13 +2,6 @@
 
 #include "bliss/bliss.hpp"
 
-void Bliss::init_msgs(void)
-{
-    // Zero initialization to avoid undefined behavior on start
-    msgin_ = prev_msgin_ = sensor_msgs::msg::Joy();
-    bliss_ = prev_bliss_ = bliss_t();
-}
-
 void Bliss::joy_callback(const sensor_msgs::msg::Joy::SharedPtr msgin)
 {
     // (Stupid) Memory management shenanigans to avoid segfaults
@@ -29,7 +22,10 @@ void Bliss::joy_callback(const sensor_msgs::msg::Joy::SharedPtr msgin)
         prev_bliss_.axes.resize(msgin->axes.size());
     }
     if (prev_bliss_.dpad.empty()) {
-        prev_bliss_.dpad.resize((size_t)2); // Assuming there is only one D-Pad
+        if (msgin->axes.size() <= 4) {
+            prev_bliss_.dpad.resize((size_t)0);
+        }
+        prev_bliss_.dpad.resize(msgin->axes.size() - 4); // Assuming there are only 2 joysticks
     }
     if (prev_bliss_.buttons.empty()) {
         prev_bliss_.buttons.resize(msgin->buttons.size());
@@ -38,7 +34,10 @@ void Bliss::joy_callback(const sensor_msgs::msg::Joy::SharedPtr msgin)
         bliss_.axes.resize(msgin->axes.size());
     }
     if (bliss_.dpad.empty()) {
-        bliss_.dpad.resize((size_t)2); // Assuming there is only one D-Pad
+        if (msgin->axes.size() <= 4) {
+            bliss_.dpad.resize((size_t)0);
+        }
+        bliss_.dpad.resize(msgin->axes.size() - 4); // Assuming there are only 2 joysticks
     }
     if (bliss_.buttons.empty()) {
         bliss_.buttons.resize(msgin->buttons.size());
@@ -61,7 +60,7 @@ void Bliss::joy_callback(const sensor_msgs::msg::Joy::SharedPtr msgin)
         bool on_press = (prev_raw == 0.0F && raw != 0.0F);
         bool on_release = (prev_raw != 0.0F && raw == 0.0F);
 
-        if (i == 6 || i == 7) { // D-Pad
+        if (i == 6 || i == 7) { // Assuming these are the axes for the D-Pad
             size_t j = i - 6;
 
             int32_t i_raw = (int32_t)raw;
@@ -153,7 +152,7 @@ void Bliss::joy_callback(const sensor_msgs::msg::Joy::SharedPtr msgin)
 
         // Property: time held
         if (prev_bliss_.buttons[i].raw == raw && raw == 1) {
-            time_held += (stamp_ns - prev_timestamp_.nanoseconds());
+            time_held += (stamp_ns - prev_stamp_ns);
         } else {
             time_held = 0UL;
         }
@@ -178,7 +177,9 @@ Bliss::Bliss(name_t node_name) : Node(node_name)
     prev_timestamp_ = clock_.now();
     timestamp_ = prev_timestamp_;
 
-    init_msgs();
+    // Zero initialization to avoid undefined behavior on start
+    msgin_ = prev_msgin_ = sensor_msgs::msg::Joy();
+    bliss_ = prev_bliss_ = bliss_t();
 
     publisher_ = this->create_publisher<bliss_t>("/bliss", 1);
     subscription_ = this->create_subscription<sensor_msgs::msg::Joy>(

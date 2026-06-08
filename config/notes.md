@@ -1,6 +1,6 @@
 # Configuration Notes
 
-## Game Controller Mappings
+## Game Controller Mappings (SDL)
 
 **Axes**:
 
