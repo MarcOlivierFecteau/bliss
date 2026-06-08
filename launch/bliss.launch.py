@@ -6,10 +6,10 @@ from launch import LaunchDescription
 
 
 def generate_launch_description():
-    node_name = LaunchConfiguration("node")
+    joy_node_name = LaunchConfiguration("joy_node")
 
-    node_name_cmd = DeclareLaunchArgument(
-        name="node",
+    joy_node_name_cmd = DeclareLaunchArgument(
+        name="joy_node",
         default_value="joy",
         description="The joy node to spin.",
         choices=["joy", "game_controller"],
@@ -18,7 +18,7 @@ def generate_launch_description():
     joy_node = Node(
         package="joy",
         executable="joy_node",
-        name=[node_name, "_node"],
+        name=[joy_node_name, "_node"],
         output="screen",
         parameters=[{"deadzone": 0.05}],
     )
@@ -31,7 +31,7 @@ def generate_launch_description():
     )
     return LaunchDescription(
         [
-            node_name_cmd,
+            joy_node_name_cmd,
             joy_node,
             bliss_node,
         ]
